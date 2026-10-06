@@ -13,7 +13,7 @@ router.get('/investment', async (_req: Request, res: Response) => {
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
 
-    const [
+        const [
       totalEquipment,
       availableCount,
       borrowedCount,
@@ -25,10 +25,12 @@ router.get('/investment', async (_req: Request, res: Response) => {
       thisMonthBorrows,
       thisMonthReturns,
       recentBorrows,
+      borrowedRecords,
       overdueRecords,
       topBorrowersRaw,
       activeByDeptRaw,
     ] = await Promise.all([
+
       db.Equipment.count(),
       db.Equipment.count({ where: { status: 'available' } }),
       db.Equipment.count({ where: { status: 'borrowed' } }),
@@ -42,22 +44,42 @@ router.get('/investment', async (_req: Request, res: Response) => {
       }),
       db.BorrowRecord.count({ where: { createdAt: { [Op.gte]: monthStart } } }),
       db.BorrowRecord.count({ where: { status: 'returned', actualReturnDate: { [Op.gte]: monthStart } } }),
+      
+          // recentBorrows
       db.BorrowRecord.findAll({
-        limit: 10,
-        order: [['createdAt', 'DESC']],
-        include: [
-          { model: db.Equipment, as: 'equipment', attributes: ['name', 'assetTag'] },
-          { model: db.User, as: 'user', attributes: ['name', 'email', 'companyId'] },
-        ],
+      limit: 10,
+      order: [['createdAt', 'DESC']],
+      include: [
+      {model: db.Equipment, as: 'equipment', attributes: ['name', 'assetTag'],},
+      { model: db.User, as: 'user', attributes: ['name', 'email', 'companyId'],},
+      ],
       }),
+       
+      // borrowedRecords
       db.BorrowRecord.findAll({
-        where: { status: 'active', expectedReturnDate: { [Op.lt]: today } },
-        order: [['expectedReturnDate', 'ASC']],
-        include: [
-          { model: db.Equipment, as: 'equipment', attributes: ['name', 'assetTag'] },
-          { model: db.User, as: 'user', attributes: ['name', 'email', 'companyId'] },
-        ],
+      where: { status: 'active',},
+      order: [['expectedReturnDate', 'ASC']],
+      include: [
+      { model: db.Equipment, as: 'equipment', attributes: ['name', 'assetTag'],},
+      { model: db.User, as: 'user', attributes: ['name', 'email', 'companyId'], },
+      ],
       }),
+       
+      // overdueRecords
+      db.BorrowRecord.findAll({
+      where: {
+      status: 'active',
+      expectedReturnDate: {
+      [Op.lt]: today,
+      },
+      },
+      order: [['expectedReturnDate', 'ASC']],
+      include: [
+      { model: db.Equipment, as: 'equipment', attributes: ['name', 'assetTag'],},
+      { model: db.User, as: 'user', attributes: ['name', 'email', 'companyId'],},
+      ],
+      }),
+
       db.sequelize.query(
         `SELECT br."userId", CAST(COUNT(br.id) AS integer) as total,
                 u.name, u.email, u."companyId", u.department
@@ -99,6 +121,7 @@ router.get('/investment', async (_req: Request, res: Response) => {
           thisMonthReturns,
         },
         recentBorrows,
+        borrowedRecords,
         overdueRecords,
         topBorrowers: (topBorrowersRaw as any[]).map((r: any) => ({
           userId: r.userId,
@@ -152,7 +175,7 @@ router.get('/expense', async (_req: Request, res: Response) => {
       db.StockMovement.count({ where: { changeType: 'consumption', createdAt: { [Op.gte]: monthStart } } }),
       db.StockMovement.findOne({
         where: { changeType: 'consumption', createdAt: { [Op.gte]: monthStart } },
-        attributes: [[fn('COALESCE', fn('SUM', literal('quantity_change')), 0), 'total']],
+        attributes: [[fn('COALESCE', fn('SUM', literal('"quantityChange"')), 0), 'total']],
         raw: true,
       }),
       db.ConsumableRequest.findAll({
