@@ -1,6 +1,6 @@
-import { Sequelize, DataTypes, Model, UUIDV4 } from 'sequelize';
+import { Sequelize, DataTypes, Model, UUIDV4 } from "sequelize";
 
-export type BorrowRequestStatus = 'pending_pic' | 'approved' | 'rejected';
+export type BorrowRequestStatus = "pending_admin" | "approved" | "rejected";
 
 export interface BorrowRequestAttributes {
   id?: string;
@@ -19,7 +19,10 @@ export interface BorrowRequestAttributes {
   updatedAt?: Date;
 }
 
-export class BorrowRequest extends Model<BorrowRequestAttributes> implements BorrowRequestAttributes {
+export class BorrowRequest
+  extends Model<BorrowRequestAttributes>
+  implements BorrowRequestAttributes
+{
   public id!: string;
   public equipmentId!: string;
   public userId!: string;
@@ -47,37 +50,49 @@ export default (sequelize: Sequelize, _dataTypes: any) => {
       equipmentId: {
         type: DataTypes.UUID,
         allowNull: false,
-        references: { model: 'equipment', key: 'id' },
+        references: { model: "equipment", key: "id" },
       },
       userId: {
         type: DataTypes.UUID,
         allowNull: false,
-        references: { model: 'users', key: 'id' },
+        references: { model: "users", key: "id" },
       },
       status: {
-        type: DataTypes.ENUM('pending_pic', 'approved', 'rejected'),
+        type: DataTypes.ENUM("pending_admin", "approved", "rejected"),
         allowNull: false,
-        defaultValue: 'pending_pic',
+        defaultValue: "pending_admin",
       },
       expectedReturnDate: { type: DataTypes.DATEONLY, allowNull: true },
       notes: { type: DataTypes.TEXT, allowNull: true },
-      picApprovedBy: { type: DataTypes.UUID, allowNull: true, references: { model: 'users', key: 'id' } },
+      picApprovedBy: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: { model: "users", key: "id" },
+      },
       picApprovedAt: { type: DataTypes.DATE, allowNull: true },
-      rejectedBy: { type: DataTypes.UUID, allowNull: true, references: { model: 'users', key: 'id' } },
+      rejectedBy: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: { model: "users", key: "id" },
+      },
       rejectedAt: { type: DataTypes.DATE, allowNull: true },
       rejectionReason: { type: DataTypes.TEXT, allowNull: true },
-      borrowRecordId: { type: DataTypes.UUID, allowNull: true, references: { model: 'borrow_records', key: 'id' } },
+      borrowRecordId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: { model: "borrow_records", key: "id" },
+      },
     },
     {
-      tableName: 'borrow_requests',
+      tableName: "borrow_requests",
       timestamps: true,
       sequelize,
       indexes: [
-        { fields: ['equipmentId'] },
-        { fields: ['userId'] },
-        { fields: ['status'] },
+        { fields: ["equipmentId"] },
+        { fields: ["userId"] },
+        { fields: ["status"] },
       ],
-    }
+    },
   );
 
   return BorrowRequest;

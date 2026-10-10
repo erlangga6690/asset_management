@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { Suspense } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { Inter } from 'next/font/google';
+import { Suspense } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import SidebarLayout from "@/components/SidebarLayout";
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 // List of public routes that don't require auth
-const publicRoutes = ['/login', '/register'];
+const publicRoutes = ["/login", "/register"];
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading, token } = useAuth();
@@ -22,9 +22,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loading) {
       if (!token && !isPublic) {
-        router.push('/login');
+        router.push("/login");
       } else if (token && isPublic) {
-        router.push('/');
+        router.push("/");
       }
     }
   }, [loading, token, isPublic, router]);
@@ -50,10 +50,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
-          <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" /></div>}>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
+              </div>
+            }
+          >
             <AuthGate>{children}</AuthGate>
           </Suspense>
         </AuthProvider>

@@ -1,6 +1,6 @@
-import { Sequelize, DataTypes, Model, UUIDV4 } from 'sequelize';
+import { Sequelize, DataTypes, Model, UUIDV4 } from "sequelize";
 
-export type UserRole = 'admin' | 'admin2' | 'pic_location' | 'pic_barang' | 'user';
+export type UserRole = "admin" | "admin2" | "user";
 
 export interface UserAttributes {
   id?: string;
@@ -39,33 +39,30 @@ export default (sequelize: Sequelize, _dataTypes: any) => {
       name: {
         type: DataTypes.STRING(200),
         allowNull: false,
-        validate: { notEmpty: { msg: 'User name is required' } },
+        validate: { notEmpty: { msg: "User name is required" } },
       },
       email: {
         type: DataTypes.STRING(200),
         allowNull: false,
         unique: true,
-        validate: { isEmail: { msg: 'Must be a valid email' } },
+        validate: { isEmail: { msg: "Must be a valid email" } },
       },
       companyId: { type: DataTypes.STRING(50), allowNull: true },
       department: { type: DataTypes.STRING(100), allowNull: true },
       password: { type: DataTypes.STRING(255), allowNull: true },
       role: {
-        type: DataTypes.ENUM('admin', 'admin2', 'pic_location', 'pic_barang', 'user'),
+        type: DataTypes.ENUM("admin", "admin2", "user"),
         allowNull: false,
-        defaultValue: 'user',
+        defaultValue: "user",
       },
       photo: { type: DataTypes.TEXT, allowNull: true },
     },
     {
-      tableName: 'users',
+      tableName: "users",
       timestamps: true,
       sequelize,
-      indexes: [
-        { unique: true, fields: ['email'] },
-        { fields: ['role'] },
-      ],
-    }
+      indexes: [{ unique: true, fields: ["email"] }, { fields: ["role"] }],
+    },
   );
 
   return User;
